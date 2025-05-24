@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.framework.oh.mapper.CodeMapper">
+    
+    <!-- Result Maps -->
+    <resultMap id="codeResultMap" type="io.framework.oh.model.Code">
+        <id property="id" column="code_id"/>
+        <result property="code" column="code_value"/>
+        <result property="name" column="code_name"/>
+        <result property="description" column="description"/>
+        <result property="isActive" column="use_yn" typeHandler="io.framework.oh.config.MyBatisConfig$BooleanTypeHandler"/>
+        <result property="createdAt" column="created_at" typeHandler="org.apache.ibatis.type.LocalDateTimeTypeHandler"/>
+        <result property="updatedAt" column="updated_at" typeHandler="org.apache.ibatis.type.LocalDateTimeTypeHandler"/>
+        <association property="codeGroup" javaType="io.framework.oh.model.CodeGroup">
+            <id property="id" column="group_id"/>
+            <result property="name" column="group_name"/>
+            <result property="description" column="group_description"/>
+            <result property="isActive" column="group_use_yn" typeHandler="io.framework.oh.config.MyBatisConfig$BooleanTypeHandler"/>
+        </association>
+        <association property="parentCode" javaType="io.framework.oh.model.Code">
+            <id property="id" column="parent_code_id"/>
+            <result property="code" column="parent_code_value"/>
+            <result property="name" column="parent_code_name"/>
+        </association>
+    </resultMap>
+    
+    <!-- 코드 그룹 관련 쿼리 -->
+    <select id="selectAllCodeGroups" resultType="io.framework.oh.model.CodeGroup">
+        SELECT 
+            group_id as id,
+            group_name as name,
+            description,
+            use_yn as isActive
+        FROM code_group
+        WHERE use_yn = 'Y'
+        ORDER BY group_id
+    </select>
+    
+    <select id="selectCodeGroupById" resultType="io.framework.oh.model.CodeGroup">
+        SELECT 
+            group_id as id,
+            group_name as name,
+            description,
+            use_yn as isActive
+        FROM code_group
+        WHERE group_id = #{id}
+    </select>
+    
+    <insert id="insertCodeGroup" parameterType="io.framework.oh.model.CodeGroup">
+        INSERT INTO code_group (
+            group_id,
+            group_name,
+            description,
+            use_yn
+        ) VALUES (
+            #{id},
+            #{name},
+            #{description},
+            #{isActive,typeHandler=io.framework.oh.config.MyBatisConfig$BooleanTypeHandler}
+        )
+    </insert>
+    
+    <update id="updateCodeGroup" parameterType="io.framework.oh.model.CodeGroup">
+        UPDATE code_group
+        SET group_name = #{name},
+            description = #{description},
+            use_yn = #{isActive,typeHandler=io.framework.oh.config.MyBatisConfig$BooleanTypeHandler}
+        WHERE group_id = #{id}
+    </update>
+    
+    <delete id="deleteCodeGroup">
+        UPDATE code_group
+        SET use_yn = 'N'
+        WHERE group_id = #{id}
+    </delete>
+    
+    <!-- 코드 관련 쿼리 -->
+    <select id="selectAllCodes" resultMap="codeResultMap">
+        SELECT 
+            c.code_id,
+            c.code_value,
+            c.code_name,
+            c.description,
+            c.use_yn,
+            c.created_at,
+            c.updated_at,
+            cg.group_id,
+            cg.group_name,
+            cg.description as group_description,
+            cg.use_yn as group_use_yn,
+            pc.code_id as parent_code_id,
+            pc.code_value as parent_code_value,
+            pc.code_name as parent_code_name
+        FROM code c
+        LEFT JOIN code_group cg ON c.group_id = cg.group_id
+        LEFT JOIN code pc ON c.parent_code_id = pc.code_id
+        WHERE c.use_yn = 'Y'
+        ORDER BY c.group_id
+    </select>
+    
+    <select id="selectCodesByGroupId" resultMap="codeResultMap">
+        SELECT 
+            c.code_id,
+            c.code_value,
+            c.code_name,
+            c.description,
+            c.use_yn,
+            c.created_at,
+            c.updated_at,
+            cg.group_id,
+            cg.group_name,
+            cg.description as group_description,
+            cg.use_yn as group_use_yn,
+            pc.code_id as parent_code_id,
+            pc.code_value as parent_code_value,
+            pc.code_name as parent_code_name
+        FROM code c
+        LEFT JOIN code_group cg ON c.group_id = cg.group_id
+        LEFT JOIN code pc ON c.parent_code_id = pc.code_id
+        WHERE c.group_id = #{groupId}
+        AND c.use_yn = 'Y'
+        ORDER BY c.code_id
+    </select>
+    
+    <select id="selectChildCodes" resultMap="codeResultMap">
+        SELECT 
+            c.code_id,
+            c.code_value,
+            c.code_name,
+            c.description,
+            c.use_yn,
+            c.created_at,
+            c.updated_at,
+            cg.group_id,
+            cg.group_name,
+            cg.description as group_description,
+            cg.use_yn as group_use_yn,
+            pc.code_id as parent_code_id,
+            pc.code_value as parent_code_value,
+            pc.code_name as parent_code_name
+        FROM code c
+        LEFT JOIN code_group cg ON c.group_id = cg.group_id
+        LEFT JOIN code pc ON c.parent_code_id = pc.code_id
+        WHERE c.parent_code_id = #{parentId}
+        AND c.use_yn = 'Y'
+        ORDER BY c.code_id
+    </select>
+    
+    <select id="selectCodeById" resultMap="codeResultMap">
+        SELECT 
+            c.code_id,
+            c.code_value,
+            c.code_name,
+            c.description,
+            c.use_yn,
+            c.created_at,
+            c.updated_at,
+            cg.group_id,
+            cg.group_name,
+            cg.description as group_description,
+            cg.use_yn as group_use_yn,
+            pc.code_id as parent_code_id,
+            pc.code_value as parent_code_value,
+            pc.code_name as parent_code_name
+        FROM code c
+        LEFT JOIN code_group cg ON c.group_id = cg.group_id
+        LEFT JOIN code pc ON c.parent_code_id = pc.code_id
+        WHERE c.code_id = #{id}
+    </select>
+    
+    <insert id="insertCode" parameterType="io.framework.oh.model.Code">
+        INSERT INTO code (
+            code_id,
+            group_id,
+            code_name,
+            code_value,
+            parent_code_id,
+            description,
+            use_yn
+        ) VALUES (
+            #{id},
+            #{codeGroup.id},
+            #{name},
+            #{code},
+            #{parentCode.id},
+            #{description},
+            #{isActive,typeHandler=io.framework.oh.config.MyBatisConfig$BooleanTypeHandler}
+        )
+    </insert>
+    
+    <update id="updateCode" parameterType="io.framework.oh.model.Code">
+        UPDATE code
+        SET code_name = #{name},
+            code_value = #{code},
+            group_id = #{codeGroup.id},
+            parent_code_id = #{parentCode.id},
+            description = #{description},
+            use_yn = #{isActive,typeHandler=io.framework.oh.config.MyBatisConfig$BooleanTypeHandler}
+        WHERE code_id = #{id}
+    </update>
+    
+    <delete id="deleteCode">
+        UPDATE code
+        SET use_yn = 'N'
+        WHERE code_id = #{id}
+    </delete>
+</mapper> 

@@ -1,0 +1,11 @@
+dependencies {
+    // ... existing dependencies ...
+    
+    // WebSocket
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    
+    // Jakarta EE API (for @PostConstruct and @PreDestroy)
+    implementation 'jakarta.annotation:jakarta.annotation-api'
+    
+    // ... existing code ...
+} 

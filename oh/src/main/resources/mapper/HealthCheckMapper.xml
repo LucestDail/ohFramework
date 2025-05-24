@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.framework.oh.mapper.HealthCheckMapper">
+    <cache/>
+    
+    <select id="selectNewsCompanies" resultType="io.framework.oh.model.NewsCompany">
+        SELECT 
+            id,
+            News_Company_Code as newsCompanyCode,
+            News_Company_Name as newsCompanyName,
+            ETC1 as etc1,
+            ETC2 as etc2,
+            ETC3 as etc3,
+            ETC4 as etc4,
+            ETC5 as etc5,
+            News_Company_CreateDT as newsCompanyCreateDt,
+            News_Company_UpdateDT as newsCompanyUpdateDt
+        FROM bs4news_news_company
+        LIMIT 1
+    </select>
+
+    <select id="countNewsCompanies" resultType="int">
+        SELECT COUNT(*)
+        FROM bs4news_news_company
+    </select>
+
+    <select id="getTableName" resultType="string">
+        SELECT 'bs4news_news_company'
+    </select>
+
+    <update id="setTableName">
+        SET @tableName = #{tableName}
+    </update>
+</mapper> 
